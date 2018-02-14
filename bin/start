@@ -17,9 +17,16 @@ export PATH="$PATH:/srv/www/bin/"
 chgrp -R www-data /srv/www/var
 chmod -R g+w /srv/www/var
 
-#check DB connection
-DB_CONN=`mysql -h${M2SETUP_DB_HOST} -u${M2SETUP_DB_USER} -p${M2SETUP_DB_PASSWORD} -e "use ${M2SETUP_DB_NAME}; select config_id from core_config_data where config_id='1';" -N -B`
-
+DB_CONN=0
+attempt=0
+#check DB connection (2 attempts with 30 sec delay each)
+while [[ "$DB_CONN" != "1" || "$attempt" != "3" ]]
+do
+  attempt=$((attempt + 1))
+  echo "[INFO] Trying to establish connection to database with current EnvVars [${attempt}]";
+  sleep 30
+  DB_CONN=`mysql -h${M2SETUP_DB_HOST} -u${M2SETUP_DB_USER} -p${M2SETUP_DB_PASSWORD} -e "use ${M2SETUP_DB_NAME}; select config_id from core_config_data where config_id='1';" -N -B`
+done
 if [ "$DB_CONN" = "1" ]; then
     echo "[INFO] Connection to database with current EnvVars established.";
 else
