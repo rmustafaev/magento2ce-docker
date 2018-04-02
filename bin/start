@@ -1,0 +1,44 @@
+#!/bin/bash
+
+[ ! -z "${PHP_MEMORY_LIMIT}" ]         && crudini --set /usr/local/etc/php/php.ini global memory_limit ${PHP_MEMORY_LIMIT}
+[ ! -z "${PHP_PORT}" ]                 && crudini --set /usr/local/etc/php-fpm.conf www listen [::]:${PHP_PORT}
+[ ! -z "${PHP_PM_MAX_CHILDREN}" ]      && crudini --set /usr/local/etc/php-fpm.conf www pm.max_children ${PHP_PM_MAX_CHILDREN}
+[ ! -z "${PHP_PM_START_SERVERS}" ]     && crudini --set /usr/local/etc/php-fpm.conf www pm.start_servers ${PHP_PM_START_SERVERS}
+[ ! -z "${PHP_PM_MIN_SPARE_SERVERS}" ] && crudini --set /usr/local/etc/php-fpm.conf www pm.min_spare_servers ${PHP_PM_MIN_SPARE_SERVERS}
+[ ! -z "${PHP_PM_MAX_SPARE_SERVERS}" ] && crudini --set /usr/local/etc/php-fpm.conf www pm.max_spare_servers ${PHP_PM_MAX_SPARE_SERVERS}
+# Make sure this line comes last, otherwise find/replace will replace above vars
+[ ! -z "${PHP_PM}" ]                   && crudini --set /usr/local/etc/php-fpm.conf www pm ${PHP_PM}
+[ ! -z "${APP_MAGE_MODE}" ]            && crudini --set /usr/local/etc/php-fpm.conf www env[MAGE_MODE] ${APP_MAGE_MODE}
+
+# Set path to binaries
+export PATH="$PATH:/srv/www/bin/"
+
+# Set write permission to www-data user
+chgrp -R www-data /srv/www/var
+chmod -R g+w /srv/www/var
+
+DB_CONN=0
+attempt=0
+#check DB connection (2 attempts with 30 sec delay each)
+while [[ "$DB_CONN" != "1" || "$attempt" != "3" ]]
+do
+  attempt=$((attempt + 1))
+  echo "[INFO] Trying to establish connection to database with current EnvVars [${attempt}]";
+  sleep 30
+  DB_CONN=`mysql -h${M2SETUP_DB_HOST} -u${M2SETUP_DB_USER} -p${M2SETUP_DB_PASSWORD} -e "use ${M2SETUP_DB_NAME}; select config_id from core_config_data where config_id='1';" -N -B`
+done
+if [ "$DB_CONN" = "1" ]; then
+    echo "[INFO] Connection to database with current EnvVars established.";
+else
+    echo "[ERROR] Connection to database with current EnvVars is broken."
+    exit 10;
+fi
+
+# Setup config
+/usr/local/bin/setup-config
+
+# Start the cron service
+/usr/sbin/cron
+
+# Start the php-fpm service
+/usr/local/sbin/php-fpm
