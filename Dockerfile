@@ -156,7 +156,7 @@ RUN apt-get update &&  \
   cd /srv/www/ && \
   su -c "/usr/local/bin/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition ./ $M2SETUP_VERSION" -s /bin/sh www-data && \
   mv /usr/local/etc/composer.json /srv/www/ && \
-  su -c "composer update" -s /bin/sh www-data 
+  su -c "composer update" -s /bin/sh www-data && \
   /usr/local/bin/mage-setup && \
   apt-get purge -y mariadb-server && \
   rm -rf /tmp/composer_home && \
