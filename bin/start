@@ -1,5 +1,14 @@
 #!/bin/bash
 
+sed -i "s/PHP_HOST/${PHP_HOST:-phpfpm}/" /etc/nginx/conf.d/mage.conf
+sed -i "s/PHP_PORT/${PHP_PORT:-9000}/" /etc/nginx/conf.d/mage.conf
+sed -i "s/APP_MAGE_MODE/${APP_MAGE_MODE:-default}/" /etc/nginx/conf.d/mage.conf
+sed -i "s/DOMAIN_NAME/${DOMAIN_NAME:-localhost}/" /etc/nginx/conf.d/mage.conf
+sed -i "s/WWW_DIR/${WWW_DIR:-/srv/www}/" /etc/nginx/conf.d/mage.conf
+
+DOMAIN_NAME=${DOMAIN_NAME:-localhost}
+echo -e "Domain is ${DOMAIN_NAME}"
+
 [ ! -z "${PHP_MEMORY_LIMIT}" ]         && crudini --set /usr/local/etc/php/php.ini global memory_limit ${PHP_MEMORY_LIMIT}
 [ ! -z "${PHP_PORT}" ]                 && crudini --set /usr/local/etc/php-fpm.conf www listen [::]:${PHP_PORT}
 [ ! -z "${PHP_PM_MAX_CHILDREN}" ]      && crudini --set /usr/local/etc/php-fpm.conf www pm.max_children ${PHP_PM_MAX_CHILDREN}
@@ -39,6 +48,9 @@ fi
 
 # Start the cron service
 /usr/sbin/cron
+
+# Start the nginx service
+/usr/sbin/nginx -g "daemon on;"
 
 # Start the php-fpm service
 /usr/local/sbin/php-fpm
