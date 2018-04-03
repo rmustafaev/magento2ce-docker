@@ -6,8 +6,6 @@ ENV NGINX_VERSION=1.13.10-1~jessie \
 COPY conf_ng/* /tmp/
 
 RUN set -x \
-	#&& apt-get update \
-	#&& apt-get install --no-install-recommends --no-install-suggests -y gnupg1 \
 	&& \
 	NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
 	found=''; \
@@ -91,6 +89,10 @@ RUN set -x \
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
 
+RUN ls -l /tmp && \
+  mv /tmp/conf/nginx.conf /etc/nginx/ && \
+  mv /tmp/conf/conf.d/mage.conf /etc/nginx/conf.d/ 
+
 EXPOSE 80
 
 ENV M2SETUP_DB_HOST=127.0.0.1 \
@@ -140,6 +142,10 @@ RUN apt-get update &&  \
   xsl \
   gettext \
   zip && \
+  python-openssl \
+  python-crypto \
+  python-setuptools \
+  python-pip && \
   mv /usr/local/etc/php.ini /usr/local/etc/php/ && \
   service mysql start && \
   /usr/bin/mysqladmin -u $M2SETUP_DB_USER password $M2SETUP_DB_PASSWORD && \
@@ -157,7 +163,6 @@ RUN apt-get update &&  \
   su -c "/usr/local/bin/composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition ./ $M2SETUP_VERSION" -s /bin/sh www-data && \
   mv /usr/local/etc/composer.json /srv/www/ && \
   su -c "composer update" -s /bin/sh www-data && \
-  ls -l /usr/local/bin/ && \
   /usr/local/bin/mage-setup && \
   apt-get purge -y mariadb-server && \
   rm -rf /tmp/composer_home && \
