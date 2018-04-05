@@ -4,7 +4,7 @@ sed -i "s/PHP_HOST/${PHP_HOST:-phpfpm}/" /etc/nginx/conf.d/mage.conf
 sed -i "s/PHP_PORT/${PHP_PORT:-9000}/" /etc/nginx/conf.d/mage.conf
 sed -i "s/APP_MAGE_MODE/${APP_MAGE_MODE:-default}/" /etc/nginx/conf.d/mage.conf
 sed -i "s/DOMAIN_NAME/${DOMAIN_NAME:-localhost}/" /etc/nginx/conf.d/mage.conf
-sed -i "s/WWW_DIR/${WWW_DIR:-/srv/www}/" /etc/nginx/conf.d/mage.conf
+sed -i "s|WWW_DIR|${WWW_DIR:-/srv/www}|" /etc/nginx/conf.d/mage.conf
 
 DOMAIN_NAME=${DOMAIN_NAME:-localhost}
 echo -e "Domain is ${DOMAIN_NAME}"

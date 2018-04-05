@@ -88,7 +88,8 @@ RUN ln -sf /dev/stdout /var/log/nginx/access.log \
 
 COPY conf_ng/ /tmp/
 
-RUN mv /tmp/conf/nginx.conf /etc/nginx/ && \
+RUN rm -rf /etc/nginx/conf.d/* && \ 
+    mv /tmp/conf/nginx.conf /etc/nginx/ && \
     mv /tmp/conf/conf.d/mage.conf /etc/nginx/conf.d/ 
 
 EXPOSE 80
