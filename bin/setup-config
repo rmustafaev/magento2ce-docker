@@ -29,10 +29,19 @@ fi
 
 echo "Running Magento 2 modules setup script..."
 
-DISABLED_MODULES=$(su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento module:status" | awk '/List of disabled modules/,0' | grep -v 'List of disabled modules')
+  =$(su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento module:status" | awk '/List of disabled modules/,0' | grep -v 'List of disabled modules')
 
 if [ "$DISABLED_MODULES" = "None" ]; then
   echo -e "No disabled modules found"
+  if [ "$M2SETUP_COMPILATION" = "True"]; then
+    echo -e "Modules compilation started"
+    rm -rf ${WWW_DIR}/var/di
+    rm -rf ${WWW_DIR}/var/generation
+    rm -rf ${WWW_DIR}/pub/static/*
+    su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:upgrade"
+    su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:di:compile"
+    su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:static-content:deploy"
+  fi
 else 
   echo -e "Modules compilation started"
   rm -rf ${WWW_DIR}/var/di
