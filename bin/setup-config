@@ -33,7 +33,7 @@ echo "Running Magento 2 modules setup script..."
 
 if [ "$DISABLED_MODULES" = "None" ]; then
   echo -e "No disabled modules found"
-  if [ "$M2SETUP_COMPILATION" = "True"]; then
+  if [ "$M2SETUP_COMPILATION" = "default"]; then
     echo -e "Modules compilation started"
     rm -rf ${WWW_DIR}/var/di
     rm -rf ${WWW_DIR}/var/generation
