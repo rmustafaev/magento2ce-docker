@@ -50,7 +50,7 @@ fi
 /usr/sbin/cron
 
 # Start the nginx service
-/usr/sbin/nginx -g "daemon on;"
+/usr/sbin/nginx -g "daemon off;" &
 
 # Start the php-fpm service
 /usr/local/sbin/php-fpm
