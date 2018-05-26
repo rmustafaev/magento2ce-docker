@@ -4,7 +4,9 @@ ENV NGINX_VERSION=1.13.10-1~jessie \
     NJS_VERSION=1.13.10.0.1.15-1~jessie
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends --no-install-suggests -y gnupg2 \
+    && apt-get install --no-install-recommends --no-install-suggests -y \
+    gnupg2 \
+    dirmngr \
     && set -x \
 	&& \
 	NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
