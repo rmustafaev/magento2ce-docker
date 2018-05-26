@@ -71,8 +71,8 @@ RUN set -x \
 			&& apt-get -o Acquire::GzipIndexes=false update \
 			;; \
 	esac \
-	\
-	&& apt-get install --no-install-recommends --no-install-suggests -y \
+
+RUN	apt-get install --no-install-recommends --no-install-suggests -y \
 						$nginxPackages \
 						gettext-base \
 	&& rm -rf /var/lib/apt/lists/* \
