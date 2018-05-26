@@ -3,7 +3,9 @@ FROM php:7.0-fpm
 ENV NGINX_VERSION=1.13.10-1~jessie \
     NJS_VERSION=1.13.10.0.1.15-1~jessie
 
-RUN set -x \
+RUN apt-get update \
+    && apt-get install --no-install-recommends --no-install-suggests -y gnupg2 \
+    && set -x \
 	&& \
 	NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
 	found=''; \
