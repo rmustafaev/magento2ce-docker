@@ -1,14 +1,9 @@
-FROM php:7.0-fpm
+FROM php:7.0-fpm-jessie
 
 ENV NGINX_VERSION=1.13.10-1~jessie \
     NJS_VERSION=1.13.10.0.1.15-1~jessie
 
-RUN apt-get update \
-    && apt-get install -y \
-    gnupg \
-    dirmngr \
-    libssl1.0.0 \
-    && set -x \
+RUN set -x \
 	&& \
 	NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
 	found=''; \
