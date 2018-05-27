@@ -5,7 +5,7 @@ ENV NGINX_VERSION=1.13.10-1~jessie \
 
 RUN apt-get update \
     && apt-get install -y \
-    gnupg2 \
+    gnupg \
     dirmngr \
     libssl1.0.0 \
     && set -x \
