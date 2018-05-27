@@ -7,6 +7,7 @@ RUN apt-get update \
     && apt-get install -y \
     gnupg2 \
     dirmngr \
+    openssl \
     && set -x \
 	&& \
 	NGINX_GPGKEY=573BFD6B3D8FBC641079A6ABABF5BD827BD9BF62; \
