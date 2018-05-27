@@ -4,7 +4,7 @@ ENV NGINX_VERSION=1.13.10-1~jessie \
     NJS_VERSION=1.13.10.0.1.15-1~jessie
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends --no-install-suggests -y \
+    && apt-get install -y \
     gnupg2 \
     dirmngr \
     libssl1.0.0 \
