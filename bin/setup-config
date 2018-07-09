@@ -6,7 +6,7 @@ chown www-data:www-data ${WWW_DIR}/bin/magento
 cat <<EOF | crontab -u www-data -
 */1 * * * * flock -w 1 ${WWW_DIR}/var/session/cron.flock -c "/usr/local/bin/php ${WWW_DIR}/update/cron.php" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
 */1 * * * * flock -w 1 ${WWW_DIR}/var/session/m2-cron-run.flock -c "sleep 15 && /usr/local/bin/php ${WWW_DIR}/bin/magento cron:run" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
-*/1 * * * * flock -w 1 ${WWW_DIR}/var/session/m2-setup-cron-run.flock -c "sleep 5 && usr/local/bin/php ${WWW_DIR}/bin/magento setup:cron:run" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
+*/1 * * * * flock -w 1 ${WWW_DIR}/var/session/m2-setup-cron-run.flock -c "sleep 5 && /usr/local/bin/php ${WWW_DIR}/bin/magento setup:cron:run" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
 EOF
 
 echo "Adding write permissions to app/etc"
