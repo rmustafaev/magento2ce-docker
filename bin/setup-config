@@ -1,0 +1,63 @@
+#!/bin/bash
+WWW_DIR=/srv/www
+
+chown www-data:www-data ${WWW_DIR}/bin/magento
+
+cat <<EOF | crontab -u www-data -
+*/1 * * * * flock -w 1 ${WWW_DIR}/var/session/cron.flock -c "/usr/local/bin/php ${WWW_DIR}/update/cron.php" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
+*/1 * * * * flock -w 1 ${WWW_DIR}/var/session/m2-cron-run.flock -c "sleep 15 && /usr/local/bin/php ${WWW_DIR}/bin/magento cron:run" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
+*/1 * * * * flock -w 1 ${WWW_DIR}/var/session/m2-setup-cron-run.flock -c "sleep 5 && /usr/local/bin/php ${WWW_DIR}/bin/magento setup:cron:run" >> ${WWW_DIR}/var/log/cronjob.log 2>&1
+EOF
+
+echo "Adding write permissions to app/etc"
+chmod -R ug+w ${WWW_DIR}/app/etc
+
+echo "Initializing modules setup..."
+
+if [ ! -z "${M2SETUP_DB_HOST}" ] && [ ! -z "${M2SETUP_DB_NAME}" ] && [ ! -z "${M2SETUP_DB_USER}" ] && [ ! -z "${M2SETUP_DB_PASSWORD}" ] && [ ! -z "${M2SETUP_ADMIN_URI}" ]; then
+  echo Y | su www-data -s /bin/sh  -c "/usr/local/bin/php ${WWW_DIR}/bin/magento setup:config:set --db-host=${M2SETUP_DB_HOST} --db-name=${M2SETUP_DB_NAME} --db-user=${M2SETUP_DB_USER} --db-password=${M2SETUP_DB_PASSWORD} --backend-frontname=${M2SETUP_ADMIN_URI}"
+else 
+  echo -e "Please specify all required variables: db-host, db-name, db-user, db-password, backend-frontname"
+  exit 10;
+fi
+if [ ! -z "${M2SETUP_BASE_URL}" ]; then
+  echo Y | su www-data -s /bin/sh -c "/usr/local/bin/php ${WWW_DIR}/bin/magento setup:store-config:set --base-url=${M2SETUP_BASE_URL}"
+else
+  echo -e "Please specify base-url"
+  exit 10
+fi
+
+echo "Running Magento 2 modules setup script..."
+
+  =$(su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento module:status" | awk '/List of disabled modules/,0' | grep -v 'List of disabled modules')
+
+if [ "$DISABLED_MODULES" = "None" ]; then
+  echo -e "No disabled modules found"
+  if [ "$M2SETUP_COMPILATION" = "default"]; then
+    echo -e "Modules compilation started"
+    rm -rf ${WWW_DIR}/var/di
+    rm -rf ${WWW_DIR}/var/generation
+    rm -rf ${WWW_DIR}/pub/static/*
+    su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:upgrade"
+    su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:di:compile"
+    su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:static-content:deploy"
+  fi
+else 
+  echo -e "Modules compilation started"
+  rm -rf ${WWW_DIR}/var/di
+  rm -rf ${WWW_DIR}/var/generation
+  rm -rf ${WWW_DIR}/pub/static/*
+  su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:upgrade"
+  su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:di:compile"
+  su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento setup:static-content:deploy"
+fi
+
+su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento cache:clean"
+su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento cache:flush"
+su www-data -s /bin/sh -c "${WWW_DIR}/bin/magento info:adminuri"
+
+echo "Removing write permissions from app/etc for security reasons"
+chmod -R ug-w ${WWW_DIR}/app/etc
+
+echo "The setup script has completed execution."
+

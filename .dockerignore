@@ -1,0 +1,5 @@
+Dockerfile
+*.hash
+*.env
+.git/
+*.md
