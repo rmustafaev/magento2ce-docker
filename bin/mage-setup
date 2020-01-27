@@ -1,0 +1,22 @@
+#!/bin/sh
+echo "Initializing setup..."
+
+cd /srv/www
+
+if [ -f ./app/etc/config.php ] || [ -f ./app/etc/env.php ]; then
+  echo "It appears Magento is already installed (app/etc/config.php or app/etc/env.php exist). Exiting setup..."
+
+else 
+  echo "Running Magento 2 setup script..."
+  su www-data -s /bin/sh -c "/usr/local/bin/php -d memory_limit=2G /srv/www/bin/magento setup:install --db-host=$M2SETUP_DB_HOST --db-name=$M2SETUP_DB_NAME --db-user=$M2SETUP_DB_USER --db-password=$M2SETUP_DB_PASSWORD --base-url=$M2SETUP_BASE_URL --admin-firstname=$M2SETUP_ADMIN_FIRSTNAME --admin-lastname=$M2SETUP_ADMIN_LASTNAME --admin-email=$M2SETUP_ADMIN_EMAIL --admin-user=$M2SETUP_ADMIN_USER --admin-password=$M2SETUP_ADMIN_PASSWORD $M2SETUP_USE_SAMPLE_DATA_STRING"
+  echo "Removing write permissions from app/etc for security reasons"
+  chmod -R a-w /srv/www/app/etc/
+
+  # Create folder to upload documents to Magento.
+  mkdir -p /srv/www/var/ftp
+  chown -R www-data:www-data /srv/www/var/ftp
+  chmod 775 /srv/www/var/ftp
+  echo "The setup script has completed execution."
+fi
+
+exec "$@"

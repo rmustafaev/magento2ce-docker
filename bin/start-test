@@ -1,0 +1,14 @@
+#!/bin/bash
+WWW_DIR=/srv/www
+echo -e "Adding write permissions to app/etc"
+chmod -R ug+w ${WWW_DIR}/app/etc
+
+#Change php memory limit
+[ ! -z "${PHP_MEMORY_LIMIT}" ] && crudini --set /usr/local/etc/php/php.ini global memory_limit ${PHP_MEMORY_LIMIT}
+
+# Run unit tests
+echo -e "Running unit tests"
+set -ex
+su www-data -s /bin/sh -c "/usr/local/bin/php ${WWW_DIR}/bin/magento setup:di:compile"
+su www-data -s /bin/sh -c "/usr/local/bin/php ${WWW_DIR}/bin/magento dev:tests:run unit"
+
